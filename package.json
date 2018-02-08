@@ -1,0 +1,28 @@
+{
+  "name": "fullstack-kolmos-viikko",
+  "version": "1.0.0",
+  "description": "tehtavaprojekti",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "nodemon index.js",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/evanarkko/fullstack-kolmos-viikko.git"
+  },
+  "author": "Evan Miller",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/evanarkko/fullstack-kolmos-viikko/issues"
+  },
+  "homepage": "https://github.com/evanarkko/fullstack-kolmos-viikko#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2"
+  },
+  "devDependencies": {
+    "nodemon": "^1.14.12"
+  }
+}
