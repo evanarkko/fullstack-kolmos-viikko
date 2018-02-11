@@ -5,6 +5,7 @@ const morgan = require('morgan')
 const cors = require('cors')
 
 
+app.use(express.static('build'))
 morgan.token('reqbody', function (req, res) { return JSON.stringify(req.body) })
 app.use(
     morgan(function (tokens, req, res) {
@@ -63,8 +64,11 @@ app.get('/info', (req, res) => {
               </div>`)
 })
 
-app.delete('/persons/:id', (req, res) => {
+app.delete('/api/persons/:id', (req, res) => {
     const id = Number(req.params.id)
+    console.log(id)
+    console.log('blahhh')
+    console.log(id)
     persons = persons.filter(person => person.id !== id)
     res.sendStatus(204)
 })
