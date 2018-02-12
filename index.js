@@ -3,10 +3,21 @@ const bodyParser = require('body-parser')
 const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
+const Person = require('./models/person')
+
+const formatPerson = (person) => {
+    const formattedPerson = {...person._doc, id: person._id}
+    delete formattedPerson._id
+    delete formattedPerson.__v
+
+    return formattedPerson
+}
 
 
 app.use(express.static('build'))
-morgan.token('reqbody', function (req, res) { return JSON.stringify(req.body) })
+morgan.token('reqbody', function (req, res) {
+    return JSON.stringify(req.body)
+})
 app.use(
     morgan(function (tokens, req, res) {
         return [
@@ -41,61 +52,98 @@ let persons = [
 ]
 
 app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    console.log(id)
-    const person = persons.find(person => person.id === id)
-    if(person){
-        res.json(person)
-    }else{
-        res.sendStatus(404)
-    }
+    Person
+        .findById(req.params.id)
+        .then(person => {
+            res.json(formatPerson(person))
+        })
 
 })
 
 app.get('/api/persons', (req, res) => {
-    res.json(persons)
+    Person
+        .find({})
+        .then(persons => {
+            res.json(persons.map(formatPerson))
+        })
 })
 
 app.get('/info', (req, res) => {
-    const personCount = persons.length
-    res.send(`<div>
+    Person
+        .find({})
+        .then(persons => {
+            const personCount = persons.length
+            console.log(personCount)
+            res.send(`<div>
                 <p>Puhelinluettelossa ${personCount} henkilön tiedot</p>
                 <p>${new Date()}</p>
               </div>`)
+        })
+
+    /*const personCount = persons.length
+    res.send(`<div>
+                <p>Puhelinluettelossa ${personCount} henkilön tiedot</p>
+                <p>${new Date()}</p>
+              </div>`)*/
 })
 
 app.delete('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    console.log(id)
-    console.log('blahhh')
-    console.log(id)
-    persons = persons.filter(person => person.id !== id)
-    res.sendStatus(204)
+    Person.remove({_id: req.params.id})
+        .then(() => {
+            res.sendStatus(204)
+        })
 })
 
-const generateId = () => {
-    //const maxId = persons.length > 0 ? persons.map(p => p.id).sort().reverse()[0] : 1
-    //return maxId + 1
-    return Math.floor(Math.random() * 1000)
-}
+app.put('/api/persons/:id', (req, res) => {
+    const body = req.body
+    console.log(req.body)
+    console.log(req.params.id)
+
+    const newPerson = new Person({
+        name: body.name,
+        number: body.number
+    })
+
+    Person
+        .findById(req.params.id)
+        .then(person => {
+            person.number = body.number
+            console.log(person)
+            person.save()
+                .then(() => {
+                    res.sendStatus(200)
+                })
+        })
+
+})
+
 
 app.post('/api/persons', (req, res) => {//add a prs
     const body = req.body
-    if(body.name === undefined || body.number === undefined){
+    console.log(body)
+    if (body === undefined) {
         return res.status(400).json({error: 'content missing'})
     }
-    if(persons.find(person => person.name === body.name)){
-        return res.status(400).json({error: 'Name already exists'})
-    }
 
-    const person = {
-        name: body.name,
-        number: body.number,
-        id: generateId()
-    }
+    Person
+        .find({name: body.name})
+        .then(persons => {
+            if (persons.length > 0) {
+                res.sendStatus(403) //forbidden if person is in db already
+            } else {
+                const person = new Person({
+                    name: body.name,
+                    number: body.number
+                })
+                person
+                    .save()
+                    .then(savedPerson => {
+                        res.json(formatPerson(savedPerson))
+                    })
+            }
+        })
 
-    persons = persons.concat(person)
-    res.json(person)
+
 })
 
 const PORT = process.env.PORT || 3001
