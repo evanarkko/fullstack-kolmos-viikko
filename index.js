@@ -33,23 +33,6 @@ app.use(
 app.use(cors())
 app.use(bodyParser.json())
 
-let persons = [
-    {
-        name: "Evan Miller",
-        number: "0934384938",
-        id: 1
-    },
-    {
-        name: "Joseph",
-        number: "093241384938",
-        id: 2
-    },
-    {
-        name: "Johannes Korpijaakko",
-        number: "06634384938",
-        id: 3
-    }
-]
 
 app.get('/api/persons/:id', (req, res) => {
     Person
